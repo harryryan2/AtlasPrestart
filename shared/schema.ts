@@ -34,5 +34,15 @@ export const insertPrestartSchema = createInsertSchema(prestarts).omit({
   createdAt: true,
 });
 
+// API submission schema: accepts arrays for JSON columns (client sends arrays, DB stores as text)
+export const submitPrestartSchema = insertPrestartSchema.extend({
+  correctiveItems: z.union([z.string(), z.array(z.any())]).transform((v) =>
+    typeof v === "string" ? v : JSON.stringify(v)
+  ),
+  doNotOperateItems: z.union([z.string(), z.array(z.any())]).transform((v) =>
+    typeof v === "string" ? v : JSON.stringify(v)
+  ),
+});
+
 export type InsertPrestart = z.infer<typeof insertPrestartSchema>;
 export type Prestart = typeof prestarts.$inferSelect;

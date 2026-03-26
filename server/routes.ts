@@ -1,19 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPrestartSchema } from "@shared/schema";
-import { z } from "zod";
+import { insertPrestartSchema, submitPrestartSchema } from "@shared/schema";
 import nodemailer from "nodemailer";
-
-// Override schema: accept arrays for JSON columns (client sends arrays, DB stores as strings)
-const submitPrestartSchema = insertPrestartSchema.extend({
-  correctiveItems: z.union([z.string(), z.array(z.any())]).transform((v) =>
-    typeof v === "string" ? v : JSON.stringify(v)
-  ),
-  doNotOperateItems: z.union([z.string(), z.array(z.any())]).transform((v) =>
-    typeof v === "string" ? v : JSON.stringify(v)
-  ),
-});
 import { format, differenceInDays, parseISO, addDays } from "date-fns";
 
 // ─── Email config ─────────────────────────────────────────────────────────────
@@ -225,5 +214,3 @@ export async function registerRoutes(httpServer: Server, app: Express) {
   // ─── Health check ──────────────────────────────────────────────────────────
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
 }
-
-// cache-bust: 20260326232205

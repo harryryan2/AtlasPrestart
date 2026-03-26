@@ -225,3 +225,5 @@ export async function registerRoutes(httpServer: Server, app: Express) {
   // ─── Health check ──────────────────────────────────────────────────────────
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
 }
+
+// cache-bust: 20260326232205

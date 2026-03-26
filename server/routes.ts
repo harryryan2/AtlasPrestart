@@ -2,7 +2,18 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPrestartSchema } from "@shared/schema";
+import { z } from "zod";
 import nodemailer from "nodemailer";
+
+// Override schema: accept arrays for JSON columns (client sends arrays, DB stores as strings)
+const submitPrestartSchema = insertPrestartSchema.extend({
+  correctiveItems: z.union([z.string(), z.array(z.any())]).transform((v) =>
+    typeof v === "string" ? v : JSON.stringify(v)
+  ),
+  doNotOperateItems: z.union([z.string(), z.array(z.any())]).transform((v) =>
+    typeof v === "string" ? v : JSON.stringify(v)
+  ),
+});
 import { format, differenceInDays, parseISO, addDays } from "date-fns";
 
 // ─── Email config ─────────────────────────────────────────────────────────────
@@ -51,8 +62,10 @@ async function sendEmail(subject: string, html: string) {
 }
 
 function buildFaultEmail(prestart: any): string {
-  const critItems = prestart.doNotOperateItems.filter((i: any) => i.status === "faulty");
-  const corrItems = prestart.correctiveItems.filter((i: any) => i.status === "faulty");
+  const dnoItems = typeof prestart.doNotOperateItems === "string" ? JSON.parse(prestart.doNotOperateItems) : prestart.doNotOperateItems;
+  const corrItemsAll = typeof prestart.correctiveItems === "string" ? JSON.parse(prestart.correctiveItems) : prestart.correctiveItems;
+  const critItems = dnoItems.filter((i: any) => i.status === "faulty");
+  const corrItems = corrItemsAll.filter((i: any) => i.status === "faulty");
 
   let rows = "";
   if (critItems.length) {
@@ -151,7 +164,7 @@ export async function registerRoutes(httpServer: Server, app: Express) {
   // ─── Submit pre-start ───────────────────────────────────────────────────────
   app.post("/api/prestarts", async (req, res) => {
     try {
-      const parsed = insertPrestartSchema.safeParse(req.body);
+      const parsed = submitPrestartSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: "Invalid data", details: parsed.error.flatten() });
       }

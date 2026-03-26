@@ -427,27 +427,54 @@ export default function ChecklistPage() {
       <AlertDialog open={!!serviceAlert && !serviceAlertShown}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-              <Wrench className="w-5 h-5" />
-              Service Due Soon
-            </AlertDialogTitle>
+            {(() => {
+              const hoursOverdue = serviceAlert && serviceAlert.hoursRemaining <= 0;
+              const dateOverdue = serviceAlert && serviceAlert.daysRemaining <= 0;
+              const isOverdue = hoursOverdue || dateOverdue;
+              return (
+                <AlertDialogTitle className={`flex items-center gap-2 ${isOverdue ? "text-red-600 dark:text-red-400" : "text-amber-600 dark:text-amber-400"}`}>
+                  <Wrench className="w-5 h-5" />
+                  {isOverdue ? "Service Overdue" : "Service Due Soon"}
+                </AlertDialogTitle>
+              );
+            })()}
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
-                <p>This machine is approaching its service interval:</p>
+                <p>
+                  {serviceAlert && (serviceAlert.hoursRemaining <= 0 || serviceAlert.daysRemaining <= 0)
+                    ? "This machine has passed its service interval:"
+                    : "This machine is approaching its service interval:"}
+                </p>
                 {serviceAlert && serviceAlert.hoursRemaining <= 50 && (
-                  <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
-                    <span className="font-semibold text-amber-800 dark:text-amber-300">
+                  <div className={`flex items-center gap-2 rounded-md px-3 py-2 border ${
+                    serviceAlert.hoursRemaining <= 0
+                      ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
+                      : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+                  }`}>
+                    <span className={`font-semibold ${
+                      serviceAlert.hoursRemaining <= 0
+                        ? "text-red-700 dark:text-red-300"
+                        : "text-amber-800 dark:text-amber-300"
+                    }`}>
                       {serviceAlert.hoursRemaining <= 0
-                        ? "⚠️ Hours OVERDUE"
+                        ? `🔴 Hours overdue by ${Math.abs(serviceAlert.hoursRemaining)} hrs`
                         : `${serviceAlert.hoursRemaining} hours remaining`}
                     </span>
                   </div>
                 )}
                 {serviceAlert && serviceAlert.daysRemaining <= 14 && (
-                  <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
-                    <span className="font-semibold text-amber-800 dark:text-amber-300">
+                  <div className={`flex items-center gap-2 rounded-md px-3 py-2 border ${
+                    serviceAlert.daysRemaining <= 0
+                      ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
+                      : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+                  }`}>
+                    <span className={`font-semibold ${
+                      serviceAlert.daysRemaining <= 0
+                        ? "text-red-700 dark:text-red-300"
+                        : "text-amber-800 dark:text-amber-300"
+                    }`}>
                       {serviceAlert.daysRemaining <= 0
-                        ? "⚠️ Date OVERDUE"
+                        ? `🔴 Date overdue by ${Math.abs(serviceAlert.daysRemaining)} days`
                         : `${serviceAlert.daysRemaining} days remaining`}
                     </span>
                   </div>

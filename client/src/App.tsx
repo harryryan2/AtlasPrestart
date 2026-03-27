@@ -1,3 +1,4 @@
+// v3 — service overdue fix
 import { Router, Route, Switch } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -23,3 +24,4 @@ function App() {
 }
 
 export default App;
+

@@ -6,7 +6,7 @@ import { Resend } from "resend";
 import { format, differenceInDays, parseISO, addDays } from "date-fns";
 
 // ─── Email config ─────────────────────────────────────────────────────────────
-const SUPERVISOR_EMAIL = "zach@atlaspaving.au";
+const SUPERVISOR_EMAIL = "atlasprestart@gmail.com"; // forwards to zach@atlaspaving.au
 const FROM_EMAIL = "Atlas Paving Pre-Start <onboarding@resend.dev>";
 
 async function sendEmail(subject: string, html: string) {

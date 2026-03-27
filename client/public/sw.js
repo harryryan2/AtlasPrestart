@@ -1,7 +1,7 @@
 // Atlas Paving Pre-Start — Service Worker
 // Handles offline caching + background sync queue
 
-const CACHE_NAME = "atlas-prestart-v1";
+const CACHE_NAME = "atlas-prestart-v3";
 const OFFLINE_QUEUE_KEY = "atlas-prestart-offline-queue";
 
 // Assets to cache for offline use

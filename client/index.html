@@ -33,6 +33,23 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Force-clear any stale service worker caches -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var reg of registrations) {
+            reg.unregister();
+          }
+        });
+        caches.keys().then(function(keys) {
+          keys.forEach(function(key) {
+            if (key !== 'atlas-prestart-v4') {
+              caches.delete(key);
+            }
+          });
+        });
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

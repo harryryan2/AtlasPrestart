@@ -2,47 +2,33 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPrestartSchema, submitPrestartSchema } from "@shared/schema";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { format, differenceInDays, parseISO, addDays } from "date-fns";
 
 // ─── Email config ─────────────────────────────────────────────────────────────
-// Uses Outlook/Office365 SMTP. Credentials injected via env vars.
 const SUPERVISOR_EMAIL = "zach@atlaspaving.au";
-const FROM_EMAIL = process.env.SMTP_FROM || "prestart@atlaspaving.au";
-
-function createTransport() {
-  // Uses environment variables for credentials
-  // SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
-  // Falls back to a test mode if no credentials configured
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || "587"),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  }
-  // Dev/demo mode — logs emails to console
-  return null;
-}
+const FROM_EMAIL = "Atlas Paving Pre-Start <onboarding@resend.dev>";
 
 async function sendEmail(subject: string, html: string) {
-  const transport = createTransport();
-  if (!transport) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
     console.log("📧 [EMAIL DEMO MODE] Would send to:", SUPERVISOR_EMAIL);
     console.log("Subject:", subject);
     return { success: true, demo: true };
   }
   try {
-    await transport.sendMail({
+    const resend = new Resend(apiKey);
+    const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: SUPERVISOR_EMAIL,
       subject,
       html,
     });
+    if (error) {
+      console.error("Email send failed:", error);
+      return { success: false, error: String(error) };
+    }
+    console.log("📧 Email sent to", SUPERVISOR_EMAIL, "-", subject);
     return { success: true };
   } catch (err) {
     console.error("Email send failed:", err);

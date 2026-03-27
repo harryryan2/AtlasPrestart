@@ -16,13 +16,6 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        entryFileNames: `assets/[name]-[hash]-v3.js`,
-        chunkFileNames: `assets/[name]-[hash]-v3.js`,
-        assetFileNames: `assets/[name]-[hash]-v3.[ext]`,
-      },
-    },
   },
   server: {
     fs: {
